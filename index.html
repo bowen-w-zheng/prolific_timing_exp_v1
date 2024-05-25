@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timing Experiment</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        #instructions, #instructions2 {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 70%;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 1;
+            font-size: 1.2em;
+            margin: auto;
+        }
+        #instructions2 {
+            display: none;
+        }
+        .example-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .example {
+            text-align: center;
+        }
+        .example canvas {
+            margin-top: 10px;
+            width: 100px;
+            height: 100px;
+            display: block;
+        }
+        #nextButton, #prevButton, #startButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #prevButton, #startButton {
+            display: none;
+        }
+        #experimentCanvasContainer {
+            flex: 1;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            background-color: black;
+        }
+        canvas {
+            background-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div id="instructions">
+        <h2>Timing Task Instructions</h2>
+        <p>You will do a timing task. In each trial:</p>
+        <ul style="text-align: left;">
+            <li>You will see a <strong>fixation point</strong> (1 below).</li>
+            <li>Then, a circle will appear (2 below). This indicates you should <strong>start timing</strong>.</li>
+            <li>Press the <strong>space bar</strong> when you think the target time has passed.</li>
+            <li>Sometimes, you will see a <strong>flash</strong> (3 below). We are interested in studying how the flash might affect your timing.</li>
+        </ul>
+        <div class="example-container">
+            <div class="example">
+                <p>1: Fixation Point</p>
+                <canvas id="exampleCanvas1" width="100" height="100"></canvas>
+            </div>
+            <div class="example">
+                <p>2: Start Timing</p>
+                <canvas id="exampleCanvas2" width="100" height="100"></canvas>
+            </div>
+            <div class="example">
+                <p>3: Flash</p>
+                <canvas id="exampleCanvas3" width="100" height="100"></canvas>
+            </div>
+        </div>
+        <p>In practice trials, you will get feedback:</p>
+        <ul style="text-align: left;">
+            <li>A vertical bar to the <strong>left</strong> means you are too fast.</li>
+            <li>A vertical bar to the <strong>right</strong> means you are too slow.</li>
+            <li>You will also see your <strong>score</strong>, with 100 being perfect timing.</li>
+        </ul>
+        <p>Aim for the highest score. You can earn up to an extra <strong>$5</strong> based on your score.</p>
+        <button id="nextButton">Next</button>
+    </div>
+    <div id="instructions2">
+        <h2>Additional Instructions</h2>
+        <p>You will complete about 1500 trials of the experiment. The total estimated time will be around 1.5 hours, and you will be given the chance to take a break for up to 5 minutes about halfway through the experiment.</p>
+        <p>Your contribution is important for advancing fundamental science. If you have to exit the experiment before completion, you can press ESC, which will terminate the experiment and lead you to the data upload page.</p>
+        <p>You will need to upload the data even if you haven't completed the whole experiment to receive a reward. If you successfully complete the experiment, you will receive <strong>extra</strong> reward proportional to your accumulated reward for up to <strong>$5</strong> on top of what you earn.</p>
+        <button id="prevButton">Previous</button>
+        <button id="startButton">Start Experiment</button>
+    </div>
+    <div id="experimentCanvasContainer">
+        <canvas id="experimentCanvas"></canvas>
+    </div>
+    <script src="experiment.js"></script>
+</body>
+</html>
