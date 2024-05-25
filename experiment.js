@@ -89,10 +89,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const max_reward = 100;
     const flashjitterMin = -75;
     const flashjitterMax = 75;
-    const maxPracticeTrialsCount = 200;
-    const practiceTrialsCount = 4;
-    const trialperBlock = 5;
-    const formalTrialsCount = 50;
+    const maxpracticeTrialsCount = 50;
+    const trialperBlock = 120;
+    const formalTrialsCount = 600;
     const flashchangeratio = [-1, -.5, -.25, .25, .5, 1];
     const flashchangemax = 80;
     const flashmin = 650;
@@ -106,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let flashOn = 0;
     let trialCount = 0;
     let isPractice = true;
-
+    let practiceTrialCount = 0;
     let lastAnnularTime = 0;
     let timeoutHandle = null;
     let flashHandle = null;
@@ -154,15 +153,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function sampleflashTime() {
-        if (blocktrialcount > trialperBlock) {
-            transitOn = Math.random() < 0.5;
-        }
         if (transitOn) {
             transitOn = 0;
-            blocktrialcount = 0;
-            blockid++;
             flashTime = Math.max(flashTime + flashchangeratio[Math.floor(Math.random() * flashchangeratio.length)] * flashchangemax, flashmin);
             flashTime = Math.min(flashTime, flashmax);
+            correctTime = flashTime * fixRatio;
+            timeWindow = correctTime * rewardWindowRatio;
+            maxResponseTime = correctTime + 4 * timeWindow;
         }
     }
 
@@ -175,12 +172,12 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.stroke();
         lastAnnularTime = Date.now();
         state = 'waiting_for_response';
-
+    
         setTimeout(() => {
             clearCanvas(true);
             drawFixation();
         }, 100);
-
+    
         flashOn = Math.random() < 0.5;
         if (blocktrialcount == 0) {
             flashOn = 1;
@@ -188,9 +185,13 @@ document.addEventListener('DOMContentLoaded', function() {
         flashjitter = flashjitterMin + (flashjitterMax - flashjitterMin) * Math.random();
         trueflashTime = flashTime + flashjitter;
         if (flashOn) {
-            flashHandle = setTimeout(drawFlash, trueflashTime);
+            flashHandle = setTimeout(() => {
+                if (state === 'waiting_for_response') {
+                    drawFlash();
+                }
+            }, trueflashTime);
         }
-
+    
         timeoutHandle = setTimeout(() => {
             if (state === 'waiting_for_response') {
                 state = 'closed_response';
@@ -200,14 +201,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function drawFlash() {
+        if (state !== 'waiting_for_response') return;
         clearCanvas(true);
         ctx.fillStyle = 'white';
         ctx.beginPath();
         ctx.arc(centerX, centerY, annularSize, 0, Math.PI * 2);
         ctx.fill();
         setTimeout(() => {
-            clearCanvas(true);
-            drawFixation();
+            if (state === 'waiting_for_response') {
+                clearCanvas(true);
+                drawFixation();
+            }
         }, 100);
     }
 
@@ -248,6 +252,8 @@ document.addEventListener('DOMContentLoaded', function() {
             flashOn: flashOn,
             flashTime: flashTime,
             trueflashTime: trueflashTime,
+            correctTime: correctTime,
+            timeWindow: timeWindow,
             error: error,
             reward: reward,
             blocktrialcount: blocktrialcount,
@@ -261,28 +267,30 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fill();
 
         if (isPractice) {
+            practiceTrialCount++;
             drawErrorBar(error);
         }
-
+        if (!isPractice) {
+            trialCount++;
+            blocktrialcount++;
+        }
         ctx.fillStyle = 'white';
         ctx.font = "20px Arial";
         ctx.fillText("Reward: " + reward.toFixed(2), centerX - 50, centerY + 50);
 
         setTimeout(() => {
-            trialCount++;
-            blocktrialcount++;
-            if (isPractice && trialCount >= practiceTrialsCount) {
+            if (isPractice && practiceTrialCount >= maxpracticeTrialsCount) {
                 isPractice = false;
                 blocktrialcount = 0;
-                trialCount = 0;
                 alert('Practice completed. Starting formal trials.');
             } else if (!isPractice && trialCount >= formalTrialsCount) {
                 endExperiment();
                 return;
             } else if (!isPractice && blocktrialcount >= trialperBlock) {
-                blockCount++;
+                transitOn = Math.random() < 0.5;
                 blocktrialcount = 0;
-                if (blockCount % 5 === 0 && blockCount > 0) {
+                blockid++;
+                if (blockid % 3 === 0 && blockid > 0) {
                     initiateBreak();
                     return;
                 }
@@ -346,7 +354,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function endBreak() {
         inBreak = false;
         isPractice = true;
-        trialCount = 0;
+        practiceTrialCount = 0;
         blocktrialcount = 0;
         alert("Break over. Restarting practice trials.");
         clearCanvas();
