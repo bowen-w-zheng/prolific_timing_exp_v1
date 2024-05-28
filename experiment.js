@@ -90,8 +90,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const flashjitterMin = -75;
     const flashjitterMax = 75;
     const maxpracticeTrialsCount = 50;
-    const trialperBlock = 120;
-    const formalTrialsCount = 600;
+    const trialperBlock = 150;
+    const formalTrialsCount = 1500;
     const flashchangeratio = [-1, -.5, -.25, .25, .5, 1];
     const flashchangemax = 80;
     const flashmin = 650;
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
         flashOn = Math.random() < 0.5;
         if (blocktrialcount == 0) {
-            flashOn = 1;
+            flashOn = true;
         }
         flashjitter = flashjitterMin + (flashjitterMax - flashjitterMin) * Math.random();
         trueflashTime = flashTime + flashjitter;
@@ -268,6 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (isPractice) {
             practiceTrialCount++;
+            blocktrialcount++;
             drawErrorBar(error);
         }
         if (!isPractice) {
@@ -288,11 +289,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             } else if (!isPractice && blocktrialcount >= trialperBlock) {
                 transitOn = Math.random() < 0.5;
-                blocktrialcount = 0;
-                blockid++;
-                if (blockid % 3 === 0 && blockid > 0) {
-                    initiateBreak();
-                    return;
+                if (transitOn) {
+                    blocktrialcount = 0;
+                    blockid++;
+                    if (blockid % 3 === 0 && blockid > 0) {
+                        initiateBreak();
+                        return;
+                    }
                 }
             }
             clearCanvas();
