@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const canvas = document.getElementById('experimentCanvas');
     const ctx = canvas.getContext('2d');
-
+    const participantId = Math.random().toString(36).substring(7);
     const instructions = document.getElementById('instructions');
     const instructions2 = document.getElementById('instructions2');
     const nextButton = document.getElementById('nextButton');
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const max_reward = 100;
     const flashjitterMin = -75;
     const flashjitterMax = 75;
-    const maxpracticeTrialsCount = 50;
+    const maxPracticeTrialsCount = 50;
     const trialperBlock = 150;
     const formalTrialsCount = 1500;
     const flashchangeratio = [-1, -.5, -.25, .25, .5, 1];
@@ -233,6 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function giveFeedback(isCorrect, responseTime) {
+        console.log('trialCount:', trialCount);
         clearTimeout(timeoutHandle);
         clearTimeout(flashHandle);
         state = 'feedback';
@@ -280,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.fillText("Reward: " + reward.toFixed(2), centerX - 50, centerY + 50);
 
         setTimeout(() => {
-            if (isPractice && practiceTrialCount >= maxpracticeTrialsCount) {
+            if (isPractice && practiceTrialCount >= maxPracticeTrialsCount) {
                 isPractice = false;
                 blocktrialcount = 0;
                 alert('Practice completed. Starting formal trials.');
@@ -292,11 +293,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (transitOn) {
                     blocktrialcount = 0;
                     blockid++;
-                    if (blockid % 3 === 0 && blockid > 0) {
+                    if (blockid % 5 === 0 && blockid > 0) {
                         initiateBreak();
                         return;
                     }
                 }
+            }
+            // Save data every 50 trials
+            if (trialCount % 50 === 0) {
+                uploadDataToS3(trialData, `data_${participantId}.json`);
             }
             clearCanvas();
             setTimeout(startTrial, iti);
@@ -312,25 +317,31 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(drawAnnular, setTimeDur);
     }
 
+    function uploadDataToS3(data, fileName) {
+        const s3 = new AWS.S3();
+        const params = {
+            Bucket: 'timing-online-experiment',
+            Key: fileName,
+            Body: JSON.stringify(data),
+            ContentType: 'application/json'
+        };
+
+        s3.putObject(params, function(err, data) {
+            if (err) {
+                console.log('Error uploading data:', err);
+            } else {
+                console.log('Successfully uploaded data to S3');
+            }
+        });
+    }
+
     function endExperiment() {
         let dataToSend = JSON.stringify(trialData);
 
-        const blob = new Blob([dataToSend], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'experiment_data.json';
-        a.click();
+        // Automatically upload data to S3
+        uploadDataToS3(trialData, `data_${participantId}.json`);
 
-        alert("Please upload the downloaded file to the Google Form to complete the study. You will be redirected to Prolific to finish.");
-
-        const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSeF4b3Hy1ov1NfiySurlQiQY6qeWqgYp1idL4_RdzF1Jes-Nw/viewform?usp=sf_link";
-        const newWindow = window.open(googleFormUrl, "_blank");
-        if (newWindow) {
-            newWindow.focus();
-        } else {
-            alert("Popup blocked! Please allow popups for this website. If you don't see the option, copy and paste this link manually: https://docs.google.com/forms/d/e/1FAIpQLSeF4b3Hy1ov1NfiySurlQiQY6qeWqgYp1idL4_RdzF1Jes-Nw/viewform?usp=sf_link");
-        }
+        alert("Data has been uploaded. You will be redirected to Prolific to finish.");
 
         setTimeout(function() {
             window.location.href = "https://app.prolific.com/submissions/complete?cc=C1JFHEUP";
@@ -380,4 +391,3 @@ document.addEventListener('DOMContentLoaded', function() {
 
     window.addEventListener('resize', resizeCanvas);
 });
-

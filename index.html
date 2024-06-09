@@ -72,6 +72,15 @@
             background-color: transparent;
         }
     </style>
+    <!-- Include AWS SDK -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.825.0.min.js"></script>
+    <script>
+        // Configure AWS SDK
+        AWS.config.region = 'us-east-2'; // Region
+        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+            IdentityPoolId: 'us-east-2:193ca762-7c64-47a6-9e4b-9323058b9dca', // Your identity pool id here
+        });
+    </script>
 </head>
 <body>
     <div id="instructions">
@@ -109,14 +118,14 @@
     <div id="instructions2">
         <h2>Additional Instructions</h2>
         <p>You will complete about 1500 trials of the experiment. The total estimated time will be around 2 hour, and you will be given the chance to take a break for up to 5 minutes about halfway through the experiment.</p>
-        <p>Your contribution is important for advancing fundamental science. If you have to exit the experiment before completion, you can press ESC, which will terminate the experiment and lead you to the data upload page.</p>
-        <p>You will need to upload the data even if you haven't completed the whole experiment to receive a reward. If you successfully complete the experiment, you will receive <strong>extra</strong> reward proportional to your accumulated reward for up to <strong>$5</strong> on top of what you earn.</p>
+        <p>Your contribution is important for advancing fundamental science. If you have to exit the experiment before completion, you can press ESC, which will terminate the experiment.</p>
+        <p>If you successfully complete the experiment, you will receive <strong>extra</strong> reward proportional to your accumulated reward for up to <strong>$5</strong> on top of what you earn. So try aiming for high rewards.</p>
         <button id="prevButton">Previous</button>
         <button id="startButton">Start Experiment</button>
     </div>
     <div id="experimentCanvasContainer">
         <canvas id="experimentCanvas"></canvas>
     </div>
-    <script src="experiment.js"></script>
+    <script src="experiment_test.js"></script>
 </body>
 </html>
