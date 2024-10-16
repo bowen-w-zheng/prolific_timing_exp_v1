@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const flashjitterMax = 75;
     const maxPracticeTrialsCount = 50;
     const trialperBlock = 150;
-    const formalTrialsCount = 1500;
+    const formalTrialsCount = 700;
     const flashchangeratio = [-1, -.5, -.25, .25, .5, 1];
     const flashchangemax = 80;
     const flashmin = 650;
@@ -109,8 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastAnnularTime = 0;
     let timeoutHandle = null;
     let flashHandle = null;
-    let blockCount = 0;
     let trialData = [];
+    let rewardPresentationTime = 1000;
 
     let blocktrialcount = 0;
     let blockid = 0;
@@ -283,6 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             if (isPractice && practiceTrialCount >= maxPracticeTrialsCount) {
                 isPractice = false;
+                rewardPresentationTime = 500;
                 blocktrialcount = 0;
                 alert('Practice completed. Starting formal trials.');
             } else if (!isPractice && trialCount >= formalTrialsCount) {
@@ -293,7 +294,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (transitOn) {
                     blocktrialcount = 0;
                     blockid++;
-                    if (blockid % 5 === 0 && blockid > 0) {
+                    if (blockid % 7 === 0 && blockid > 0) {
                         initiateBreak();
                         return;
                     }
@@ -305,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             clearCanvas();
             setTimeout(startTrial, iti);
-        }, 2000);
+        }, rewardPresentationTime);
     }
 
     function startTrial() {
@@ -313,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
         clearCanvas();
         state = 'init';
         drawFixation();
-        setTimeDur = boundedExponential(setTimeDurMean, setTimeDurMin, setTimeDurMax);
+        setTimeDur = boundedExponential(1/setTimeDurMean, setTimeDurMin, setTimeDurMax);
         setTimeout(drawAnnular, setTimeDur);
     }
 
@@ -368,6 +369,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function endBreak() {
         inBreak = false;
         isPractice = true;
+        rewardPresentationTime = 1000;
         practiceTrialCount = 0;
         blocktrialcount = 0;
         alert("Break over. Restarting practice trials.");
